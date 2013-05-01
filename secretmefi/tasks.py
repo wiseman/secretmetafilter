@@ -1,6 +1,7 @@
 import datetime
 import logging
 import re
+import robotparser
 import string
 import urllib2
 import urlparse
@@ -14,20 +15,44 @@ import webapp2
 logger = logging.getLogger(__name__)
 
 
+METAFILTER_ROBOT_RULES_URL = 'http://metafilter.com/robots.txt'
+
 METAFILTER_INDEX_URL = string.Template(
   'http://metafilter.com/index.cfm?page=$page_num')
 
 MAX_POST_AGE = datetime.timedelta(days=3)
 
-USER_AGENT = ('Mozilla/5.0 (compatible; secretmefibot/0.1; '
-              '+http://secretmefi.appspot.com/bot.html)')
+USER_AGENT = 'secretmefibot'
+
+FULL_USER_AGENT = ('Mozilla/5.0 (compatible; %s/0.1; '
+                   '+http://secretmefi.appspot.com/bot.html)') % (
+                     USER_AGENT)
+
+
+def get_robot_rules():
+  rules = memcache.get('robots.txt')
+  if not rules:
+    logger.info('Fetching robot rules at %s', METAFILTER_ROBOT_RULES_URL)
+    rules = robotparser.RobotFileParser()
+    rules.set_url(METAFILTER_ROBOT_RULES_URL)
+    rules.read()
+    memcache.set('robots.txt', rules, time=3600)
+  return rules
+
+
+def can_fetch_url(url):
+  robot_rules = get_robot_rules()
+  return robot_rules.can_fetch(USER_AGENT, url)
 
 
 def fetch_url(url):
-  opener = urllib2.build_opener()
-  opener.addheaders = [('User-agent', USER_AGENT)]
-  response = opener.open(url)
-  return response
+  if can_fetch_url(url):
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', USER_AGENT)]
+    response = opener.open(url)
+    return response
+  else:
+    logger.info('Skipping URL %s due to exclusion by robots.txt', url)
 
 
 class IndexPageScraperWorker(webapp2.RequestHandler):
@@ -46,6 +71,17 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
         })
 
 
+class ScrapingHistory(object):
+  @staticmethod
+  def has_been_scraped(url, cookie):
+    return memcache.get(url, namespace=cookie)
+
+  @staticmethod
+  def record_scrape(url, cookie):
+    memcache.set(url, True, namespace=cookie, time=3600)
+
+
+
 class PostPageScraperWorker(webapp2.RequestHandler):
   def post(self):
     post_url = self.request.get('url')
@@ -55,9 +91,10 @@ class PostPageScraperWorker(webapp2.RequestHandler):
     post_title, post_time, comments = scrape_post_page(
       post_url)
     age = datetime.datetime.now() - post_time
+    index_url = get_index_page_url(index_page_num)
     if (age < MAX_POST_AGE and
-        not memcache.get(index_page_num, namespace=cookie)):
-      memcache.set(index_page_num, True, namespace=cookie, time=3600)
+        not ScrapingHistory.has_been_scraped(index_url, cookie)):
+      ScrapingHistory.record_scrape(index_url, cookie)
       next_page_num = int(index_page_num) + 1
       logger.info(
         'Found an old post (%s) on index page %s, queuing index page %s',
@@ -70,7 +107,7 @@ class PostPageScraperWorker(webapp2.RequestHandler):
 
 
 def scrape_post_page(url):
-  result = urllib2.urlopen(url)
+  result = fetch_url(url)
   if result.getcode() == 200:
     post_title, post_time, comments = parse_post_page(url, result.read())
     return post_title, post_time, comments
@@ -117,9 +154,13 @@ def parse_post_page(url, html):
   return post_title, post_time, comments
 
 
+def get_index_page_url(page_num):
+  return METAFILTER_INDEX_URL.substitute(page_num=page_num)
+
+
 def scrape_index_page(page_num):
-  url = METAFILTER_INDEX_URL.substitute(page_num=page_num)
-  result = urllib2.urlopen(url)
+  url = get_index_page_url(page_num)
+  result = fetch_url(url)
   if result.getcode() == 200:
     post_urls = parse_index_page(url, result.read())
     return post_urls
