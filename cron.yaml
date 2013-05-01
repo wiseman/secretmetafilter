@@ -1,0 +1,3 @@
+- description: Refresh posts
+  url: /admin
+  schedule: every 6 hours

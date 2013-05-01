@@ -46,14 +46,21 @@ class MainPage(webapp2.RequestHandler):
 
 class AdminPage(webapp2.RequestHandler):
   def get(self):
-    template = jinja.get_template('admin.tmpl')
-    self.response.write(template.render())
+    if self.request.headers.get('X-AppEngine-Cron', False):
+      self.refresh_posts()
+      self.response.write('OK')
+    else:
+      template = jinja.get_template('admin.tmpl')
+      self.response.write(template.render())
 
   def post(self):
+    self.refresh_posts()
+    self.redirect('/admin')
+
+  def refresh_posts(self):
     taskqueue.add(
       url='/task/IndexPageScraperWorker',
       params={'page_num': 0})
-    self.redirect('/admin')
 
 
 ROUTES = [
