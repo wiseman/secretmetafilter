@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Metafilter N-gram Viewer : About</title>
+    <link rel="stylesheet" type="text/css" href="site.css">
+  </head>
+  <body id="container">
+    <h1 id="logo" style="padding-left: 0cm; color: #009925; font-size: 28px;"><a href="/">Metafilter N-gram Viewer</a></h1>
+    
+    <blockquote>
+  
+      <a name="what"><h2>What does the N-gram Viewer do?</h2></a>
+
+      <p>
+        When you enter phrases in to the Metafilter, it displays a
+        graph showing how frequently those phrases have occurred in
+        the titles of Metafilter posts over the years.  You can select
+        from four different
+        corpora: <a href="http://metafilter.com">metafilter</a>, <a href="http://ask.metafilter.com">ask
+        metafilter</a>, <a href="http://metatalk.metafilter.com">metatalk</a>
+        and <a href="http://music.metafilter.com">music</a>.
+      </p>
+      <p>
+        Let's look at a sample graph:
+      </p>
+
+      <img src="n-gram-example-1.png" alt="Chart screenshot">
+
+      <p>
+        This shows trends in three n-grams from 1999 to 2013: "I for
+        one welcome" (a <i>4-gram</i>), "what it says on the tin"
+        (a <i>6-gram</i>), and "slyt" (a <i>1-gram</i>
+        or <i>unigram</i>).
+
+        What the y-axis shows is this: of all the 4-grams seen in each
+        year in titles of www.metafilter.com posts, what percentage of
+        them are "I for one welcome"?  Of all the 3-grams in each
+        year, what percentage of them are "what it says on the tin"?
+        What percentage of unigrams are "slyt"?
+
+        Here, you can see that the first time the phrase "I for one
+        welcome" was used in a title was 2004 and peaked in 2010, that
+        the last time "what it says on the tin" was clever is 2008,
+        and that since 2010 the use of "slyt" in post titles has
+        exploded.
+      </p>
+
+      <a name="howmany"><h2>How big does <i>n</i> go?</h2></a>
+
+      <p>
+        The viewer can show 1-grams, 2-grams, 3-grams, 4-grams,
+        5-grams and even 6-grams.
+      </p>
+
+      <a name="howpunct"><h2>How does the n-gram viewer handle punctuation?</h2></a>
+
+      <p>
+        The n-gram viewer does some "cooking" of text before
+        processing it:
+
+        <ul>
+          <li>Punctuation is removed.</li>
+          <li>Many contractions are expanded and possessives are
+          removed (for example, "i'm" is treated "i am").</li>
+        </ul>
+      </p>
+
+
+      <a name="who"><h2>Who is responsible for this?</h2></a>
+
+      <p>
+        I am John Wiseman,
+        AKA <a href="http://www.metafilter.com/user/17982">jjwiseman</a>
+        and <a href="https://twitter.com/lemonodor">lemonodor</a>.
+        There is no official link between this project and Metafilter.
+      </p>
+
+      <p>
+        The best non-public way to contact me is via
+        email: <a href="mailto:jjwiseman@gmail.com">jjwiseman@gmail.com</a>.
+      </p>
+
+      <a name="where"><h2>Where does the data come from?</h2></a>
+
+      <p>
+        The data for the Metafilter n-gram viewer comes from
+        the <a href="http://stuff.metafilter.com/infodump/">Metafilter
+        infodump</a>.
+      </p>
+
+      <p>
+        The data is up-to-date as of Jan. 26, 2013.
+      </p>
+
+      <a name="stats"><h2>Data statistics</h2></a>
+      
+      <table>
+        <tr><th>Site</th><th>Distinct n-grams</th><th></tr>
+        <tr><td>mefi</td><td>1489931</td></tr>
+        <tr><td>askme</td><td>3626298</td></tr>
+        <tr><td>meta</td><td>228822</td></tr>
+        <tr><td>music</td><td>43466</td></tr>
+      </table>
+
+      <a name="bugs"><h2>Are there bugs?</h2></a>
+      
+      <p>
+        Yes.  See <a href="https://github.com/wiseman/mefingram/issues">this list</a>.
+      </p>
+
+      <a name="code"><h2>I want to see the code or run it myself</h2></a>
+
+      <p>
+        That's great!  All the code is available
+        at <a href="https://github.com/wiseman/mefingram">https://github.com/wiseman/mefingram</a>.
+      </p>
+    </blockquote>
+
+    <div id="announcement">
+      <a href="https://developers.google.com/appengine/"><img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" /></a>
+    </div>
+    
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38146412-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+    </script>
+
+  </body>
+
+</html>

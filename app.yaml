@@ -1,0 +1,33 @@
+application: secretmefi
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+skip_files:
+- ^(.*/)?app\.yaml
+- ^(.*/)?app\.yml
+- ^(.*/)?index\.yaml
+- ^(.*/)?index\.yml
+- ^(.*/)?#.*#
+- ^(.*/)?.*~
+- ^(.*/)?.*\.py[co]
+- ^(.*/)?.*/RCS/.*
+- ^(.*/)?\..*
+- env
+
+builtins:
+- remote_api: on
+- appstats: on
+
+libraries:
+- name: jinja2
+  version: latest
+
+handlers:
+- url: /static
+  static_dir: secretmefi/static
+  expiration: "10m"
+
+- url: /.*
+  script: gae.app

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="author" content="John Wiseman jjwiseman@gmail.com">
+    <title>Metafilter N-gram Viewer</title>
+    <link rel="stylesheet" type="text/css" href="static/site.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+
+
+MIN_YEAR = 1999;
+MAX_YEAR = 2013;
+
+CHART_OPTIONS = {
+  chartArea: { left: 100, width: "85%" },
+  focusTarget: 'category',
+  legend: { position: 'top' },
+  tooltip: { isHtml: true },
+  hAxis: {
+    title: 'Year',
+    format: '####',
+    gridlines: { count: 1 }
+  },
+  vAxis: {
+    title: 'Frequency %',
+    format: '0.00########%',
+    gridlines: { count: 6 },
+    minValue: 0,
+    baselineColor: 'black'
+  }
+};
+
+CORPUS_SITE_MAP = {
+  'mefi': 'metafilter.com',
+  'askme': 'ask.metafilter.com',
+  'meta': 'metatalk.metafilter.com',
+  'music': 'music.metafilter.com'
+};
+
+
+Occurrences = function(corpus, phrase_data) {
+  this.corpus = corpus;
+  this.phrase_data_ = phrase_data;
+};
+
+Occurrences.prototype.getPhrases = function() {
+  var i = 0;
+  var phrases = [];
+  console.log('this=');
+  console.log(this);
+  for (phrase in this.phrase_data_) {
+    console.log(phrase);
+    phrases[i++] = phrase;
+  }
+  console.log(phrases);
+  return phrases;
+};
+
+Occurrences.prototype.getPostIdsForYear = function(year) {
+  var postIds = [];
+  for (phrase in this.phrase_data_) {
+    var phrase_results = this.phrase_data_[phrase];
+    if (year in this.phrase_data_[phrase]) {
+      postIds = postIds.concat(this.phrase_data_[phrase][year][1]);
+      }
+  }
+  return postIds;
+};
+
+Occurrences.prototype.getChartRows = function() {
+  // Row format is [[year, p_1, p_2, ...], ...] where p_n is the
+  // number of occurrences of phrase 1 for that year.
+  rows = [];
+  var row_num = 0;
+  for (year = MIN_YEAR; year <= MAX_YEAR; year++) {
+    row = [year];
+    field_num = 1;
+    for (phrase in this.phrase_data_) {
+      if (year in this.phrase_data_[phrase]) {
+        row[field_num++] = this.phrase_data_[phrase][year][0];
+      } else {
+        row[field_num++] = 0;
+      }
+    }
+    rows[row_num++] = row;
+  }
+  return rows;
+}
+
+
+
+function htmlEncode(value){
+  //create a in-memory div, set it's inner text(which jQuery automatically encodes)
+  //then grab the encoded contents back out.  The div never exists on the page.
+  return $('<div/>').text(value).html();
+}
+
+
+function getUrlForPost(corpus, postId) {
+  return 'http://' + CORPUS_SITE_MAP[corpus] + '/' + escape(postId);
+}
+
+
+function showPostsForYear(year) {
+  var postIds = OCCURRENCES.getPostIdsForYear(year);
+  console.log('postids');
+  console.log(postIds);
+  // Limit to the first 30 posts.
+  postIds = postIds.slice(0, 30);
+  location.hash = year;
+  $.getJSON(
+    '/post',
+    {
+      'corpus': OCCURRENCES.corpus,
+      'postids': postIds.join()
+    },
+    function(data) {
+      var i = 0;
+      html = '<h2>' + year + '</h2><p>';
+      for (i = 0; i < data.length; i++) {
+        var post = data[i];
+        var postId = post[0];
+        var title = post[2];
+        var url = getUrlForPost(OCCURRENCES.corpus, postId);
+        html += '<a href="' + htmlEncode(url) + '">' + title + '</a><br>';
+      }
+      html += '</p>';
+      $('#post-list').html(html);
+    });
+}
+
+
+function drawChart() {
+  // Create the data table.
+  var data = new google.visualization.DataTable();
+
+  // Add column headings, with escaping for JS strings.
+    data.addColumn('number', 'Year');
+
+  var phrases = OCCURRENCES.getPhrases();
+  var i = 0;
+  for (i = 0; i < phrases.length; i++) {
+    data.addColumn('number', phrases[i]);
+  }
+
+  // Add graph data.
+  data.addRows(OCCURRENCES.getChartRows());
+
+  // Format the data columns.
+  var formatter =
+      new google.visualization.NumberFormat({ pattern: '0.0000######%' });
+  for (col = 1; col < data.getNumberOfColumns(); col++) {
+    formatter.format(data, col);
+  }
+
+  function selectHandler() {
+    var selection = chart.getSelection();
+    var message = '';
+    for (var i = 0; i < selection.length; i++) {
+      var item = selection[i];
+      var year = data.getFormattedValue(item.row, 0);
+      showPostsForYear(year);
+    }
+  }
+
+  // Draw the chart.
+  var chart = new google.visualization.LineChart(
+                      document.getElementById('chart_div'));
+  google.visualization.events.addListener(chart, 'select', selectHandler);
+  chart.draw(data, CHART_OPTIONS);
+}
+
+
+OCCURRENCES = new Occurrences(
+  {{ corpus|tojson|safe }},
+  {{ results|tojson|safe }});
+
+
+    </script>
+  </head>
+
+  <body id="container">
+    <h1 id="logo" style="padding-left: 0cm; color: #009925; font-size: 28px;"> Metafilter N-gram Viewer</span></h1>
+
+    <div style="clear:both"></div>
+    <div class="ngrams_query_section">
+      <form id="query" action="/" method="get" name="input">
+        <div class="query_graphthese_line">Graph these <span style="color:#3369e8;font-weight:bold">case-insensitive</span> comma-separated phrases:
+          <input type="text"
+                 name="content"
+                 size="60"
+                 value="{{content}}"
+                 maxlength=240 />
+        </div>
+        <div class="query_dcs_line">
+          from the corpus
+          <select name="corpus">
+            <option value="mefi" {% if corpus == 'mefi' %} selected {% endif %}>Metafilter</option>
+            <option value="askme" {% if corpus == 'askme' %} selected {% endif %}>Ask Metafilter</option>
+            <option value="meta" {% if corpus == 'meta' %} selected {% endif %}>Metatalk</option>
+            <option value="music" {% if corpus == 'music' %} selected {% endif %}>Music</option>
+          </select>
+        </div>
+
+        <div class="query_submit_line">
+          <input type="submit" value="Search lots of titles" />
+        </div>
+      </form>
+    </div>
+
+    <script type="text/javascript">
+      document.forms['input'].elements['content'].focus();
+    </script>
+
+
+    <div style="clear:both"></div>
+
+
+    <div class="ngrams_chart_section">
+              <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+              <script type="text/javascript">
+// Load the Visualization API.
+google.load('visualization', '1', {'packages':['corechart']});
+
+// Set a callback to run when the Google Visualization API is loaded.
+google.setOnLoadCallback(drawChart);
+
+$(function() {
+  if (location.hash.slice(1) !== '') {
+    showPostsForYear(location.hash.slice(1));
+  }
+})
+
+// Callback that creates and populates a data table, and draws the chart.
+                      </script>
+              <div align="left" id="chart_div" style="height: 400px;"></div>
+
+    </div>
+
+    <div id="post-list">
+    </div>
+
+    <div id="about">
+      <a href="/static/about.html">About Metafilter N-gram Viewer</a>
+    </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-38146412-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+    </script>
+
+  </body>
+</html>

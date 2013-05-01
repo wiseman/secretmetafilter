@@ -1,0 +1,82 @@
+html, body, div, h1, h2, h3, h4, h5, h6, p, img, dl, dt, dd, caption, tbody, tfoot, thead, tr, th {
+    margin:0;
+    padding:0; 
+}
+
+body {
+    font-family:arial, sans-serif;
+    font-size:83%;
+    background:#fff;
+    color:#000;
+    margin:12px 10px 10px;
+}
+
+p {
+    margin:1em 0;
+}
+
+img {
+    border:0;
+}
+
+h1 {
+    font-size:1.3em;
+    border-bottom:1px solid #999;
+    padding:.2em 0;
+    margin:.7em 0 0 .5em;
+    color: #666;
+}
+
+h2 { font-size:120%; }
+h3 { font-size:110%; }
+h4 { font-size:100%; }
+h5 { font-size:83%; }
+
+a:link { color:#00c; }
+a:visited { color:#551a8b; }
+a:active { color:#f00; }
+
+td#content { width:auto; }
+
+hr {
+    height:1px;
+    background-color:#fff;
+    border:0;
+    border-bottom:1px solid #ccc;
+}
+
+.ngrams_chart_section {
+    text-align:center;
+}
+
+#announcement {
+    text-align:center;
+}
+
+#about {
+    text-align:center;
+}
+
+table {
+    margin-left: 0.5cm;
+    margin-top: 13px;
+    border-color: gray;
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: bold;
+    text-align: left;
+    vertical-align: bottom;
+}
+
+td {
+    text-align: left;
+    vertical-align: top;
+    padding: 4px;
+    border-top: 1px solid gray;
+}
+
+h2 {
+    margin-top: 0.8cm;
+}
