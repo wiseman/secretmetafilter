@@ -44,16 +44,21 @@ class MainPage(webapp2.RequestHandler):
     self.response.write(template.render(template_values))
 
 
-class Test1Page(webapp2.RequestHandler):
+class AdminPage(webapp2.RequestHandler):
   def get(self):
+    template = jinja.get_template('admin.tmpl')
+    self.response.write(template.render())
+
+  def post(self):
     taskqueue.add(
       url='/task/IndexPageScraperWorker',
       params={'page_num': 0})
+    self.redirect('/admin')
 
 
 ROUTES = [
   ('/', MainPage),
-  ('/test1', Test1Page),
+  ('/admin', AdminPage),
   ('/task/IndexPageScraperWorker', tasks.IndexPageScraperWorker),
   ('/task/PostPageScraperWorker', tasks.PostPageScraperWorker)
   ]

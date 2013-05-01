@@ -29,5 +29,9 @@ handlers:
   static_dir: secretmefi/static
   expiration: "10m"
 
+- url: /admin
+  login: admin
+  script: gae.app
+
 - url: /.*
   script: gae.app
