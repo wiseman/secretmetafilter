@@ -22,7 +22,9 @@ METAFILTER_ROBOT_RULES_URL = 'http://metafilter.com/robots.txt'
 METAFILTER_INDEX_URL = string.Template(
   'http://metafilter.com/index.cfm?page=$page_num')
 
-MAX_POST_AGE = datetime.timedelta(days=1)
+MAX_POST_AGE = datetime.timedelta(days=31)
+
+MIN_POST_AGE = datetime.timedelta(days=7)
 
 USER_AGENT = 'secretmefibot'
 
@@ -92,8 +94,9 @@ class PostPageScraperWorker(webapp2.RequestHandler):
     logger.info('%s scraping post page %s', self, post_url)
     post = scrape_post_page(post_url)
     age = datetime.datetime.now() - post.posted_time
-    if age < MAX_POST_AGE:
-      data.save_post(post)
+    if age <= MAX_POST_AGE:
+      if age >= MIN_POST_AGE:
+        data.save_post(post)
       index_url = get_index_page_url(index_page_num)
       if not ScrapingHistory.has_been_scraped(index_url, cookie):
         ScrapingHistory.record_scrape(index_url, cookie)

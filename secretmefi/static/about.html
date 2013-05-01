@@ -15,8 +15,9 @@
       <p>
 
         Secret Metafilter highlights discussions that are still active
-        on older Metafilter posts.  It shows comments made on posts
-        that are between 1 week and 1 month old.
+        on older Metafilter posts.  It shows comments made in the past
+        two weeks on posts that that are between one week and one
+        month old.
 
         The idea comes from Metafilter
         user <a href="http://www.metafilter.com/user/17835">painquale</a>,
@@ -43,7 +44,15 @@
 
       <p>
         Secret Metafilter scrapes the past month's worth of posts on
-        metafilter.com every two hours.
+        metafilter.com every 6 hours.
+      </p>
+
+      <p>
+        The scraper advertises itself with the <tt>User-agent</tt>
+        "secretmefibot", and it obeys <tt>Disallow</tt> rules
+        in <tt>robots.txt</tt>.  It is hardcoded not to scrape more
+        than 10 pages/minute.  It typically hits about 90 pages every
+        6 hours, for an average of 1 page every 4 minutes.
       </p>
 
       <a name="bugs"><h2>Are there bugs?</h2></a>

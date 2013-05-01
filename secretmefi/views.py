@@ -24,13 +24,19 @@ def pretty_timedelta_filter(v):
 jinja.filters['pretty_timedelta'] = pretty_timedelta_filter
 
 
+MAX_COMMENT_AGE = datetime.timedelta(days=14)
+
+
 class MainPage(webapp2.RequestHandler):
   def get(self):
+    now = datetime.datetime.now()
     posts = data.get_posts()
     posts = [p for p in posts if p.num_comments > 0]
-    posts = sorted(posts, key=lambda p: p.comments[-1].posted_time, reverse=True)
+    posts = [p for p in posts
+             if now - p.comments[-1].posted_time < MAX_COMMENT_AGE]
+    posts = sorted(
+      posts, key=lambda p: p.comments[-1].posted_time, reverse=True)
     posts = [p.to_dict() for p in posts]
-    now = datetime.datetime.now()
     for p in posts:
       p['posted_timedelta'] = p['posted_time'] - now
     template = jinja.get_template('index.tmpl')
