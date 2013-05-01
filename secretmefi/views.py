@@ -1,8 +1,11 @@
+import datetime
 import logging
 import os.path
 
 from google.appengine.api import taskqueue
 import jinja2
+import pretty_timedelta
+
 import webapp2
 
 from secretmefi import data
@@ -15,11 +18,21 @@ jinja = jinja2.Environment(
     os.path.dirname(__file__), 'templates')))
 
 
+def pretty_timedelta_filter(v):
+  return pretty_timedelta.pretty_timedelta(v)
+
+jinja.filters['pretty_timedelta'] = pretty_timedelta_filter
+
+
 class MainPage(webapp2.RequestHandler):
   def get(self):
     posts = data.get_posts()
     posts = [p for p in posts if p.num_comments > 0]
     posts = sorted(posts, key=lambda p: p.comments[-1].posted_time, reverse=True)
+    posts = [p.to_dict() for p in posts]
+    now = datetime.datetime.now()
+    for p in posts:
+      p['posted_timedelta'] = p['posted_time'] - now
     template = jinja.get_template('index.tmpl')
     template_values = {'posts': posts}
     self.response.write(template.render(template_values))

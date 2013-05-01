@@ -80,3 +80,9 @@ td {
 h2 {
     margin-top: 0.8cm;
 }
+
+.comments {
+    line-height: 130%;
+    margin-left: 75px;
+    margin-right: 75px;
+}

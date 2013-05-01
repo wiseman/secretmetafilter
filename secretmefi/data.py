@@ -28,6 +28,15 @@ class Post(object):
       num_comments=self.num_comments,
       comments=json.dumps([c.to_dict() for c in self.comments]))
 
+  def to_dict(self):
+    return {
+      'url': self.url,
+      'title': self.title,
+      'posted_time': self.posted_time,
+      'num_comments': self.num_comments,
+      'comments': [c.to_dict() for c in self.comments]
+      }
+
   @staticmethod
   def from_model(post_model):
     return Post(
