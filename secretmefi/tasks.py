@@ -12,6 +12,8 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 import webapp2
 
+from secretmefi import data
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +22,7 @@ METAFILTER_ROBOT_RULES_URL = 'http://metafilter.com/robots.txt'
 METAFILTER_INDEX_URL = string.Template(
   'http://metafilter.com/index.cfm?page=$page_num')
 
-MAX_POST_AGE = datetime.timedelta(days=3)
+MAX_POST_AGE = datetime.timedelta(days=1)
 
 USER_AGENT = 'secretmefibot'
 
@@ -88,43 +90,46 @@ class PostPageScraperWorker(webapp2.RequestHandler):
     index_page_num = self.request.get('index_page_num')
     cookie = self.request.get('scraper_cookie')
     logger.info('%s scraping post page %s', self, post_url)
-    post_title, post_time, comments = scrape_post_page(
-      post_url)
-    age = datetime.datetime.now() - post_time
-    index_url = get_index_page_url(index_page_num)
-    if (age < MAX_POST_AGE and
-        not ScrapingHistory.has_been_scraped(index_url, cookie)):
-      ScrapingHistory.record_scrape(index_url, cookie)
-      next_page_num = int(index_page_num) + 1
-      logger.info(
-        'Found an old post (%s) on index page %s, queuing index page %s',
-        age, index_page_num, next_page_num)
-      taskqueue.add(
-        url='/task/IndexPageScraperWorker',
-        params={
-          'page_num': next_page_num
+    post = scrape_post_page(post_url)
+    age = datetime.datetime.now() - post.posted_time
+    if age < MAX_POST_AGE:
+      data.save_post(post)
+      index_url = get_index_page_url(index_page_num)
+      if not ScrapingHistory.has_been_scraped(index_url, cookie):
+        ScrapingHistory.record_scrape(index_url, cookie)
+        next_page_num = int(index_page_num) + 1
+        logger.info(
+          'Found an old post (%s) on index page %s, queuing index page %s',
+          age, index_page_num, next_page_num)
+        taskqueue.add(
+          url='/task/IndexPageScraperWorker',
+          params={
+            'page_num': next_page_num
           })
 
 
 def scrape_post_page(url):
   result = fetch_url(url)
   if result.getcode() == 200:
-    post_title, post_time, comments = parse_post_page(url, result.read())
-    return post_title, post_time, comments
+    post = parse_post_page(url, result.read())
+    return post
 
 
 COMMENT_TIMESTAMP_RE = re.compile(
   'posted by .* at ([0-9]+:[0-9]+ (?:AM|PM) +on [A-Za-z]+ [0-9]+)')
 
+POST_TIMESTAMP_RE = re.compile(
+  '^([A-Za-z]+ [0-9]+, [0-9]+ [0-9]+:[0-9]+ (?:AM|PM)).*')
+
 
 def parse_post_page(url, html):
   soup = bs4.BeautifulSoup(html)
   title_h1 = soup.find('h1', class_='posttitle')
-  post_title = title_h1.contents[0]
+  post_title = unicode(title_h1.contents[0])
   logger.info('post title=%s', post_title)
   date_div = soup.find('span', class_='smallcopy')
-  date_str = date_div.contents[0].strip()
-  post_time = datetime.datetime.strptime(date_str, '%B %d, %Y')
+  date_str = POST_TIMESTAMP_RE.match(date_div.get_text()).group(1)
+  post_time = datetime.datetime.strptime(date_str, '%B %d, %Y %I:%M %p')
   logger.info('post time=%s', post_time)
   # The last <div class="comments"> says "You are not currently logged
   # in."
@@ -137,7 +142,7 @@ def parse_post_page(url, html):
     # Fixup anchors.
     #logger.info('%s', comment_div)
     for anchor in comment_div.find_all('a'):
-      if 'href' in anchor:
+      if 'href' in anchor.attrs:
         anchor['href'] = urlparse.urljoin(
           url, anchor['href'])
       del anchor['target']
@@ -149,9 +154,16 @@ def parse_post_page(url, html):
       timestamp_str, '%I:%M %p  on %B %d')
     comment_time = comment_time.replace(year=post_time.year)
     #logger.info('%s', comment_time)
-    comments.append(comment_div.prettify())
+    comments.append(data.Comment(
+      html=unicode(comment_div),
+      posted_time=comment_time))
   logger.info('Found %s comments at %s', len(comments), url)
-  return post_title, post_time, comments
+  return data.Post(
+    url=url,
+    title=post_title,
+    posted_time=post_time,
+    num_comments=len(comments),
+    comments=comments)
 
 
 def get_index_page_url(page_num):
