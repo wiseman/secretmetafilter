@@ -64,7 +64,7 @@ class MetafilterIndexPageParser(object):
 
   def _page_iter(self, html):
     tree = lxml_html.document_fromstring(html)
-    for element in tree.iter('div', 'h2'):
+    for element in tree.iter():
       if element.tag == 'h2':
         yield ('date', element)
       elif (element.tag == 'div' and 'class' in element.attrib and
