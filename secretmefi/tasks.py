@@ -141,7 +141,7 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
       for url in index_post_num_comments:
         index_num_comments = index_post_num_comments.get(url)
         db_num_comments = db_post_num_comments.get(url, 0)
-        if index_post_num_comments > db_post_num_comments:
+        if index_num_comments > db_num_comments:
           if url in db_post_num_comments:
             logger.info(
               'Queueing %s because it has %s comments now instead of %s',
