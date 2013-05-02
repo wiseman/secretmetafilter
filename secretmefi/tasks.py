@@ -65,7 +65,7 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
     logger.info('%s scraping index page %s', self, page_num)
     post_urls = scrape_index_page(page_num)
     cookie = uuid.uuid4()
-    for post_url in post_urls[0:5]:
+    for post_url in post_urls:
       taskqueue.add(
         url='/task/PostPageScraperWorker',
         params={
