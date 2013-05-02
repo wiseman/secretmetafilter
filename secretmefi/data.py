@@ -82,8 +82,17 @@ def save_post(post):
   post_model.put()
 
 
-def get_posts():
+def get_all_posts():
   logger.info('Fetching all posts')
   posts = [Post.from_model(p) for p in PostModel.all()]
   logger.info('Got %s posts.', len(posts))
+  return posts
+
+
+def get_posts(urls):
+  logger.info('looking up %s', urls)
+  keys = [db.Key.from_path('PostModel', url) for url in urls]
+  post_models = db.get(keys)
+  logger.info('post models=%s', post_models)
+  posts = [Post.from_model(p) for p in post_models if p]
   return posts

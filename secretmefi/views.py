@@ -30,7 +30,7 @@ MIN_AGE_DELTA = datetime.timedelta(days=7)
 class MainPage(webapp2.RequestHandler):
   def get(self):
     now = datetime.datetime.now()
-    posts = data.get_posts()
+    posts = data.get_all_posts()
     posts = [p for p in posts if p.num_comments > 0]
     posts = [p for p in posts
              if p.comments[-1].posted_time - p.posted_time >= MIN_AGE_DELTA]

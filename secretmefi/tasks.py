@@ -1,15 +1,19 @@
 import datetime
+import itertools
 import logging
 import re
 import robotparser
 import string
+import StringIO
 import urllib2
 import urlparse
 import uuid
 
-import bs4
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
+from lxml import etree
+from lxml import cssselect
+from lxml import html as lxml_html
 import webapp2
 
 from secretmefi import data
@@ -63,16 +67,32 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
   def post(self):
     page_num = self.request.get('page_num')
     logger.info('%s scraping index page %s', self, page_num)
-    post_urls = scrape_index_page(page_num)
+    index_posts = scrape_index_page(page_num)[0:5]
+    index_post_num_comments = {p.url: p.num_comments for p in index_posts}
+    db_posts = data.get_posts([p.url for p in index_posts])
+    db_post_num_comments = {p.url: p.num_comments for p in db_posts}
     cookie = uuid.uuid4()
-    for post_url in post_urls:
-      taskqueue.add(
-        url='/task/PostPageScraperWorker',
-        params={
-          'url': post_url,
-          'index_page_num': page_num,
-          'scraper_cookie': cookie
-        })
+    for url in index_post_num_comments:
+      index_num_comments = index_post_num_comments.get(url)
+      db_num_comments = db_post_num_comments.get(url, 0)
+      if index_post_num_comments > db_post_num_comments:
+        if url in db_post_num_comments:
+          logger.info(
+            'Queueing %s because it has %s comments now instead of %s',
+            url, index_num_comments, db_num_comments)
+        else:
+          logger.info("Queueing %s because we haven't scraped it before.",
+          url)
+        taskqueue.add(
+          url='/task/PostPageScraperWorker',
+          params={
+            'url': url,
+            'index_page_num': page_num,
+            'scraper_cookie': cookie
+          })
+      else:
+        logger.info(
+          'Skipping %s because it still has %s comments', url, db_num_comments)
 
 
 class ScrapingHistory(object):
@@ -125,40 +145,53 @@ POST_TIMESTAMP_RE = re.compile(
   '^([A-Za-z]+ [0-9]+, [0-9]+ [0-9]+:[0-9]+ (?:AM|PM)).*')
 
 
+def stringify_children(node):
+  parts = ([node.text] +
+           list(itertools.chain(
+             *([c.text, etree.tostring(c), c.tail]
+               for c in node.getchildren()))) +
+           [node.tail])
+  # filter removes possible Nones in texts and tails
+  return ''.join(filter(None, parts))
+
+
 def parse_post_page(url, html):
-  soup = bs4.BeautifulSoup(html)
-  title_h1 = soup.find('h1', class_='posttitle')
-  post_title = unicode(title_h1.contents[0])
+  tree = lxml_html.document_fromstring(html)
+  title_h1 = cssselect.CSSSelector('h1.posttitle')(tree)[0]
+  # This is ugly, but man I can't figure out a better way with lxml or
+  # xpath.
+  post_title = stringify_children(title_h1)
+  br_pos = post_title.lower().find('<br')
+  post_title = post_title[0:br_pos]
   logger.info('post title=%s', post_title)
-  date_div = soup.find('span', class_='smallcopy')
-  date_str = POST_TIMESTAMP_RE.match(date_div.get_text()).group(1)
+  date_div = cssselect.CSSSelector('span.smallcopy')(tree)[0]
+  date_str = POST_TIMESTAMP_RE.match(date_div.text_content()).group(1)
   post_time = datetime.datetime.strptime(date_str, '%B %d, %Y %I:%M %p')
   logger.info('post time=%s', post_time)
   # The last <div class="comments"> says "You are not currently logged
   # in."
   comments = []
-  comment_divs = soup.find_all('div', class_='comments')[:-1]
-  for comment_div in comment_divs:
-    if comment_div.find('script'):
+  for comment_div in cssselect.CSSSelector('div.comments')(tree)[:-1]:
+    if comment_div.xpath('script'):
       # It's an ad :(
       continue
     # Fixup anchors.
-    #logger.info('%s', comment_div)
-    for anchor in comment_div.find_all('a'):
-      if 'href' in anchor.attrs:
-        anchor['href'] = urlparse.urljoin(
-          url, anchor['href'])
-      del anchor['target']
-    timestamp_span = comment_div.find_all('span', class_='smallcopy')[-1]
+    for anchor in comment_div.xpath('a'):
+      if 'href' in anchor.attrib:
+        anchor.attrib['href'] = urlparse.urljoin(
+          url, anchor.get('href'))
+      if 'target' in anchor.attrib:
+        del anchor.attrib['target']
+    timestamp_span = cssselect.CSSSelector('span.smallcopy')(comment_div)[-1]
     timestamp_str = COMMENT_TIMESTAMP_RE.match(
-      timestamp_span.get_text()).group(1)
+      timestamp_span.text_content()).group(1)
     #logger.info('%s', timestamp_str)
     comment_time = datetime.datetime.strptime(
       timestamp_str, '%I:%M %p  on %B %d')
     comment_time = comment_time.replace(year=post_time.year)
     #logger.info('%s', comment_time)
     comments.append(data.Comment(
-      html=unicode(comment_div),
+      html=etree.tostring(comment_div),
       posted_time=comment_time))
   logger.info('Found %s comments at %s', len(comments), url)
   return data.Post(
@@ -177,20 +210,25 @@ def scrape_index_page(page_num):
   url = get_index_page_url(page_num)
   result = fetch_url(url)
   if result.getcode() == 200:
-    post_urls = parse_index_page(url, result.read())
-    return post_urls
+    posts = parse_index_page(url, result.read())
+    logger.info('Found %s posts on %s', len(posts), url)
+    return posts
+  else:
+    logger.error('Got HTTP code %s for %s', result.getcode(), url)
+    return []
+
+
+NUM_COMMENTS_RE = re.compile('([0-9]+) comment')
 
 
 def parse_index_page(base_url, html):
-  soup = bs4.BeautifulSoup(html)
-  post_urls = []
-  for div in soup.find_all('div', class_='posttitle'):
-    a = div.find('a')
-    post_url = urlparse.urljoin(base_url, a.get('href'))
-    post_urls.append(post_url)
-  return post_urls
-
-
-
-def save_posts(posts):
-  pass
+  tree = lxml_html.document_fromstring(html)
+  posts = []
+  for title_div in cssselect.CSSSelector('div.post')(tree):
+    last_smallcopy = title_div.xpath("(span[@class='smallcopy'])[last()]")[0]
+    last_a = last_smallcopy.xpath("(a)[last()]")[0]
+    post_url = urlparse.urljoin(base_url, last_a.get('href'))
+    match = NUM_COMMENTS_RE.search(last_a.text_content())
+    num_comments = int(match.group(1))
+    posts.append(data.Post(url=post_url, num_comments=num_comments))
+  return posts
