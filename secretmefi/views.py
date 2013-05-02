@@ -28,7 +28,10 @@ jinja.filters['pretty_timedelta'] = pretty_timedelta_filter
 class MainPage(webapp2.RequestHandler):
   def get(self):
     html_model = db.get(db.Key.from_path('HtmlModel', 'index.html'))
-    self.response.write(html_model.html)
+    if html_model:
+      self.response.write(html_model.html)
+    else:
+      self.response.write('The processing is occurring.  Check back later.')
 
 
 class AdminPage(webapp2.RequestHandler):
