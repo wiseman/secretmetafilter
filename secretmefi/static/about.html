@@ -14,11 +14,10 @@
       <div class="copy">
         <p>
           Secret Metafilter highlights discussions that are still
-          active on older Metafilter posts.  It shows posts that have
-          discussions that have lasted at least a week.  That is, it
-          shows posts that are between a week and a month old, whose
-          most recent comment is at least a week after the date the
-          post was made.
+          active on older Metafilter posts.  It shows recent comments
+          (made in the past 4 days) on posts that are between a week
+          and a month old. (Metafilter posts are closed to comments
+          after a month.)
         </p>
 
         <p>
@@ -60,9 +59,13 @@
             The scraper advertises itself with the <tt>User-agent</tt>
             "secretmefibot", and it obeys <tt>Disallow</tt> rules
             in <tt>robots.txt</tt>.  It is hardcoded not to scrape
-            more than 10 pages/minute.  It typically hits about 90
-            pages every 6 hours, for an average of 1 page every 4
-            minutes.
+            more than 10 pages/minute.
+          </p>
+
+          <p>
+            The scraper tries hard not to scrape a page unless it has
+            to by scraping post metadata from index pages and then
+            deciding if it needs to scrape the post page itself.
           </p>
         </div>
 
