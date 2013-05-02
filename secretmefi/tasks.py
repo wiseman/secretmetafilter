@@ -194,7 +194,7 @@ POST_TIMESTAMP_RE = re.compile(
 def stringify_children(node):
   parts = ([node.text] +
            list(itertools.chain(
-             *([c.text, etree.tostring(c), c.tail]
+             *([c.text, etree.tostring(c, encoding=unicode), c.tail]
                for c in node.getchildren()))) +
            [node.tail])
   # filter removes possible Nones in texts and tails
@@ -237,7 +237,7 @@ def parse_post_page(url, html):
     comment_time = comment_time.replace(year=post_time.year)
     #logger.info('%s', comment_time)
     comments.append(data.Comment(
-      html=etree.tostring(comment_div),
+      html=etree.tostring(comment_div, encoding=unicode),
       posted_time=comment_time))
   logger.info('Found %s comments at %s', len(comments), url)
   return data.Post(
