@@ -4,10 +4,8 @@ import logging
 import re
 import robotparser
 import string
-import StringIO
 import urllib2
 import urlparse
-import uuid
 
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
@@ -67,11 +65,10 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
   def post(self):
     page_num = self.request.get('page_num')
     logger.info('%s scraping index page %s', self, page_num)
-    index_posts = scrape_index_page(page_num)[0:5]
+    index_posts = scrape_index_page(page_num)
     index_post_num_comments = {p.url: p.num_comments for p in index_posts}
     db_posts = data.get_posts([p.url for p in index_posts])
     db_post_num_comments = {p.url: p.num_comments for p in db_posts}
-    cookie = uuid.uuid4()
     for url in index_post_num_comments:
       index_num_comments = index_post_num_comments.get(url)
       db_num_comments = db_post_num_comments.get(url, 0)
@@ -85,50 +82,21 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
           url)
         taskqueue.add(
           url='/task/PostPageScraperWorker',
-          params={
-            'url': url,
-            'index_page_num': page_num,
-            'scraper_cookie': cookie
-          })
+          params={'url': url})
       else:
         logger.info(
           'Skipping %s because it still has %s comments', url, db_num_comments)
 
 
-class ScrapingHistory(object):
-  @staticmethod
-  def has_been_scraped(url, cookie):
-    return memcache.get(url, namespace=cookie)
-
-  @staticmethod
-  def record_scrape(url, cookie):
-    memcache.set(url, True, namespace=cookie, time=3600)
-
-
-
 class PostPageScraperWorker(webapp2.RequestHandler):
   def post(self):
     post_url = self.request.get('url')
-    index_page_num = self.request.get('index_page_num')
-    cookie = self.request.get('scraper_cookie')
     logger.info('%s scraping post page %s', self, post_url)
     post = scrape_post_page(post_url)
     age = datetime.datetime.now() - post.posted_time
     if age <= MAX_POST_AGE:
       if age >= MIN_POST_AGE:
         data.save_post(post)
-      index_url = get_index_page_url(index_page_num)
-      if not ScrapingHistory.has_been_scraped(index_url, cookie):
-        ScrapingHistory.record_scrape(index_url, cookie)
-        next_page_num = int(index_page_num) + 1
-        logger.info(
-          'Found an old post (%s) on index page %s, queuing index page %s',
-          age, index_page_num, next_page_num)
-        taskqueue.add(
-          url='/task/IndexPageScraperWorker',
-          params={
-            'page_num': next_page_num
-          })
 
 
 def scrape_post_page(url):

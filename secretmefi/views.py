@@ -58,9 +58,10 @@ class AdminPage(webapp2.RequestHandler):
     self.redirect('/admin')
 
   def refresh_posts(self):
-    taskqueue.add(
-      url='/task/IndexPageScraperWorker',
-      params={'page_num': 0})
+    for i in range(25):
+      taskqueue.add(
+        url='/task/IndexPageScraperWorker',
+        params={'page_num': i})
 
 
 ROUTES = [
