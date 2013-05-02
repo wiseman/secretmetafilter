@@ -3,81 +3,93 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Secret Metafilter : About</title>
+    <link rel="stylesheet" type="text/css" href="reset.css">
     <link rel="stylesheet" type="text/css" href="site.css">
   </head>
   <body id="container">
     <h1 id="logo" style="padding-left: 0cm; color: #009925; font-size: 28px;"><a href="/">Secret Metafilter</a></h1>
 
-    <blockquote>
+    <a name="what"><h2>What is Secret Metafilter?</h2></a>
 
-      <a name="what"><h2>What is Secret Metafilter?</h2></a>
+      <div class="copy">
+        <p>
+          Secret Metafilter highlights discussions that are still
+          active on older Metafilter posts.  It shows posts that have
+          discussions that have lasted at least a week.  That is, it
+          shows posts that are between a week and a month old, whose
+          most recent comment is at least a week after the date the
+          post was made.
+        </p>
 
-      <p>
-
-        Secret Metafilter highlights discussions that are still active
-        on older Metafilter posts.  It shows posts that have
-        discussions that have lasted at least a week.  That is, it
-        shows posts that are between a week and a month old, whose
-        most recent comment is at least a week after the date the post
-        was made.
-
-        The idea comes from Metafilter
-        user <a href="http://www.metafilter.com/user/17835">painquale</a>,
-        who wished there was a way to easily find older, active
-        threads, and called the body of such
-        threads <a href="http://metatalk.metafilter.com/22616/FPPs-that-stay-with-you#1073674">"Secret
-        Metafilter."</a>
+        <p>
+          The idea comes from Metafilter
+          user <a href="http://www.metafilter.com/user/17835">painquale</a>,
+          who wished there was a way to easily find older, active
+          threads, and called the body of such
+          threads <a href="http://metatalk.metafilter.com/22616/FPPs-that-stay-with-you#1073674">"Secret
+          Metafilter."</a>
+        </p>
+      </div>
 
       <a name="who"><h2>Who is responsible for this?</h2></a>
 
-      <p>
-        I am John Wiseman,
-        AKA <a href="http://www.metafilter.com/user/17982">jjwiseman</a>
-        and <a href="https://twitter.com/lemonodor">lemonodor</a>.
-        There is no official link between this project and Metafilter.
-      </p>
+      <div class="copy">
+        <p>
+          I am John Wiseman,
+          AKA <a href="http://www.metafilter.com/user/17982">jjwiseman</a>
+          and <a href="https://twitter.com/lemonodor">lemonodor</a>.
+          There is no official link between this project and
+          Metafilter.
+        </p>
 
-      <p>
-        The best non-public way to contact me is via
-        email: <a href="mailto:jjwiseman@gmail.com">jjwiseman@gmail.com</a>.
-      </p>
+        <p>
+          The best non-public way to contact me is via
+          email: <a href="mailto:jjwiseman@gmail.com">jjwiseman@gmail.com</a>.
+        </p>
+      </div>
 
-      <a name="where"><h2>Where does the data come from?</h2></a>
+        <a name="where"><h2>Where does the data come from?</h2></a>
 
-      <p>
-        Secret Metafilter scrapes the past month's worth of posts on
-        metafilter.com every 6 hours.
-      </p>
+        <div class="copy">
+          <p>
+            Secret Metafilter scrapes the past month's worth of posts
+            on metafilter.com every 6 hours.
+          </p>
 
-      <p>
-        The scraper advertises itself with the <tt>User-agent</tt>
-        "secretmefibot", and it obeys <tt>Disallow</tt> rules
-        in <tt>robots.txt</tt>.  It is hardcoded not to scrape more
-        than 10 pages/minute.  It typically hits about 90 pages every
-        6 hours, for an average of 1 page every 4 minutes.
-      </p>
+          <p>
+            The scraper advertises itself with the <tt>User-agent</tt>
+            "secretmefibot", and it obeys <tt>Disallow</tt> rules
+            in <tt>robots.txt</tt>.  It is hardcoded not to scrape
+            more than 10 pages/minute.  It typically hits about 90
+            pages every 6 hours, for an average of 1 page every 4
+            minutes.
+          </p>
+        </div>
 
       <a name="bugs"><h2>Are there bugs?</h2></a>
 
-      <p>
-        Yes.
-        See <a href="https://github.com/wiseman/secretmetafilter/issues">this
-        list</a>.
-      </p>
+      <div class="copy">
+        <p>
+          Yes.
+          See <a href="https://github.com/wiseman/secretmetafilter/issues">this
+          list</a>.
+        </p>
+      </div>
 
       <a name="code"><h2>I want to see the code or run it myself</h2></a>
 
-      <p>
-        That's great!  All the code is available
-        at <a href="https://github.com/wiseman/secretmetafilter">https://github.com/wiseman/secretmetafilter</a>.
-      </p>
-    </blockquote>
+      <div class="copy">
+        <p>
+          That's great!  All the code is available
+          at <a href="https://github.com/wiseman/secretmetafilter">https://github.com/wiseman/secretmetafilter</a>.
+        </p>
+      </div>
 
-    <div id="announcement">
-      <a href="https://developers.google.com/appengine/"><img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" /></a>
-    </div>
+      <div class="announcement">
+        <a href="https://developers.google.com/appengine/"><img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" /></a>
+      </div>
 
-    <script type="text/javascript">
+      <script type="text/javascript">
 
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-38146412-2']);
@@ -89,7 +101,7 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 
-    </script>
+      </script>
 
   </body>
 
