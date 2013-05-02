@@ -3,6 +3,7 @@ import logging
 import os.path
 
 from google.appengine.api import taskqueue
+from google.appengine.ext import db
 import jinja2
 import pretty_timedelta
 
@@ -24,24 +25,10 @@ def pretty_timedelta_filter(v):
 jinja.filters['pretty_timedelta'] = pretty_timedelta_filter
 
 
-MIN_AGE_DELTA = datetime.timedelta(days=7)
-
-
 class MainPage(webapp2.RequestHandler):
   def get(self):
-    now = datetime.datetime.now()
-    posts = data.get_all_posts()
-    posts = [p for p in posts if p.num_comments > 0]
-    posts = [p for p in posts
-             if p.comments[-1].posted_time - p.posted_time >= MIN_AGE_DELTA]
-    posts = sorted(
-      posts, key=lambda p: p.comments[-1].posted_time, reverse=True)
-    posts = [p.to_dict() for p in posts]
-    for p in posts:
-      p['posted_timedelta'] = p['posted_time'] - now
-    template = jinja.get_template('index.tmpl')
-    template_values = {'posts': posts}
-    self.response.write(template.render(template_values))
+    html_model = db.get(db.Key.from_path('HtmlModel', 'index.html'))
+    self.response.write(html_model.html)
 
 
 class AdminPage(webapp2.RequestHandler):
@@ -51,22 +38,33 @@ class AdminPage(webapp2.RequestHandler):
       self.response.write('OK')
     else:
       template = jinja.get_template('admin.tmpl')
-      self.response.write(template.render())
+      template_values = {
+        'message': self.request.get('msg', '')
+      }
+      self.response.write(template.render(template_values))
 
   def post(self):
-    self.refresh_posts()
-    self.redirect('/admin')
+    action = self.request.get('action')
+    if action == 'Regenerate':
+      self.refresh_html()
+      self.redirect('/admin?msg=Regenerating+HTML')
+    elif action == 'Rescrape':
+      self.refresh_posts()
+      self.redirect('/admin?msg=Rescraping+Metafilter')
 
   def refresh_posts(self):
-    for i in range(25):
-      taskqueue.add(
-        url='/task/IndexPageScraperWorker',
-        params={'page_num': i})
+    taskqueue.add(
+      url='/task/IndexPageScraperWorker',
+      params={'page_num': 0})
+
+  def refresh_html(self):
+    taskqueue.add(url='/task/HtmlGeneratorWorker')
 
 
 ROUTES = [
   ('/', MainPage),
   ('/admin', AdminPage),
+  ('/task/HtmlGeneratorWorker', tasks.HtmlGeneratorWorker),
   ('/task/IndexPageScraperWorker', tasks.IndexPageScraperWorker),
   ('/task/PostPageScraperWorker', tasks.PostPageScraperWorker)
   ]

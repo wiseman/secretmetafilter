@@ -10,8 +10,11 @@
   <body id="container">
     <h1 id="logo" style="padding-left: 0cm; color: #009925; font-size: 28px;"> Secret Metafilter</span></h1>
 
+    {{ message|safe }}
+
     <form method="POST" action="/admin">
-      <p>Refresh comments: <input type="submit" value="Refresh"></p>
+      <p>Rescrape Metafilter: <input type="submit" name="action" value="Rescrape"></p>
+      <p>Regenerate HTML: <input type="submit" name="action" value="Regenerate"></p>
     </form>
 
     <div id="about">

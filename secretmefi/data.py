@@ -20,21 +20,37 @@ class Post(object):
     self.comments = comments
 
   def to_model(self):
+    if self.comments is None:
+      comments_val = 'null'
+    else:
+      comments_val = json.dumps([c.to_dict() for c in self.comments])
     return PostModel(
       key_name=self.url,
       url=self.url,
       title=self.title,
       posted_time=self.posted_time,
       num_comments=self.num_comments,
-      comments=json.dumps([c.to_dict() for c in self.comments]))
+      last_comment_time=self.last_comment_time(),
+      comments=comments_val)
+
+  def last_comment_time(self):
+    if self.comments:
+      return self.comments[-1].posted_time
+    else:
+      return None
 
   def to_dict(self):
+    if self.comments is None:
+      comments_val = None
+    else:
+      comments_val = [c.to_dict() for c in self.comments]
     return {
       'url': self.url,
       'title': self.title,
       'posted_time': self.posted_time,
       'num_comments': self.num_comments,
-      'comments': [c.to_dict() for c in self.comments]
+      'last_comment_time': self.last_comment_time(),
+      'comments': comments_val
       }
 
   @staticmethod
@@ -71,6 +87,7 @@ class PostModel(db.Model):
   title = db.StringProperty()
   posted_time = db.DateTimeProperty()
   num_comments = db.IntegerProperty()
+  last_comment_time = db.DateTimeProperty()
   comments = db.TextProperty()
 
 
@@ -82,13 +99,6 @@ def save_post(post):
   post_model.put()
 
 
-def get_all_posts():
-  logger.info('Fetching all posts')
-  posts = [Post.from_model(p) for p in PostModel.all()]
-  logger.info('Got %s posts.', len(posts))
-  return posts
-
-
 def get_posts(urls):
   logger.info('looking up %s', urls)
   keys = [db.Key.from_path('PostModel', url) for url in urls]
@@ -96,3 +106,7 @@ def get_posts(urls):
   logger.info('post models=%s', post_models)
   posts = [Post.from_model(p) for p in post_models if p]
   return posts
+
+
+class HtmlModel(db.Model):
+  html = db.TextProperty()
