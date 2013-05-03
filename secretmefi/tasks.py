@@ -186,7 +186,7 @@ class PostPageScraperWorker(webapp2.RequestHandler):
 def scrape_post_page(url):
   result = fetch_url(url)
   if result.getcode() == 200:
-    parser = parsing.MetafilterPostPageParser(url, result.read())
+    parser = parsing.MetafilterPostPageParser(url, unicode(result.read(), 'utf-8'))
     post = parser.post
     return post
 
