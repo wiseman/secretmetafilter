@@ -1,21 +1,16 @@
 import datetime
-import itertools
 import jinja2
 import logging
 import os.path
 import pretty_timedelta
-import re
 import robotparser
 import string
 import urllib2
-import urlparse
 
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import db
-from lxml import etree
-from lxml import cssselect
-from lxml import html as lxml_html
+
 import webapp2
 
 from secretmefi import data
@@ -186,7 +181,8 @@ class PostPageScraperWorker(webapp2.RequestHandler):
 def scrape_post_page(url):
   result = fetch_url(url)
   if result.getcode() == 200:
-    parser = parsing.MetafilterPostPageParser(url, unicode(result.read(), 'utf-8'))
+    parser = parsing.MetafilterPostPageParser(
+      url, unicode(result.read(), 'utf-8'))
     post = parser.post
     return post
 
@@ -201,7 +197,7 @@ def scrape_index_page(page_num):
   if result.getcode() == 200:
     parser = parsing.MetafilterIndexPageParser(
       base_url=url,
-      html=result.read())
+      html=unicode(result.read(), 'utf-8'))
     posts = parser.posts
     logger.info('Scraped info on %s posts from %s', len(posts), url)
     return posts
