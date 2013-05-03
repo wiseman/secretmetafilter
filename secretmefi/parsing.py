@@ -1,6 +1,8 @@
 import datetime
-import urlparse
+import itertools
+import logging
 import re
+import urlparse
 
 from lxml import etree
 from lxml import cssselect
@@ -8,6 +10,7 @@ from lxml import html as lxml_html
 
 from secretmefi import data
 
+logger = logging.getLogger(__name__)
 
 PAGE_DATE_FMT = '%B %d'
 NUM_COMMENTS_RE = re.compile('([0-9]+) comment')
@@ -17,6 +20,76 @@ PAGE_POST_TIMESTAMP_FMT = '%I:%M %p'
 
 class Error(Exception):
   pass
+
+
+def stringify_children(node):
+  parts = ([node.text] +
+           list(itertools.chain(
+             *([c.text, etree.tostring(c, encoding=unicode), c.tail]
+               for c in node.getchildren()))) +
+           [node.tail])
+  # filter removes possible Nones in texts and tails
+  return ''.join(filter(None, parts))
+
+
+COMMENT_TIMESTAMP_RE = re.compile(
+  'posted by .* at ([0-9]+:[0-9]+ (?:AM|PM) +on [A-Za-z]+ [0-9]+)')
+
+POST_TIMESTAMP_RE = re.compile(
+  '^([A-Za-z]+ [0-9]+, [0-9]+ [0-9]+:[0-9]+ (?:AM|PM)).*')
+
+
+class MetafilterPostPageParser(object):
+  def __init__(self, base_url=None, html=None):
+    self.post = None
+    self._parse(base_url, html)
+
+  def _parse(self, base_url, html):
+    tree = lxml_html.document_fromstring(html)
+    title_h1 = cssselect.CSSSelector('h1.posttitle')(tree)[0]
+    # This is ugly, but man I can't figure out a better way with lxml or
+    # xpath.
+    post_title = stringify_children(title_h1)
+    br_pos = post_title.lower().find('<br')
+    post_title = post_title[0:br_pos]
+    logger.info('post title=%s', post_title)
+    date_div = cssselect.CSSSelector('span.smallcopy')(tree)[0]
+    date_str = POST_TIMESTAMP_RE.match(date_div.text_content()).group(1)
+    post_time = datetime.datetime.strptime(date_str, '%B %d, %Y %I:%M %p')
+    logger.info('post time=%s', post_time)
+    # The last <div class="comments"> says "You are not currently logged
+    # in."
+    comments = []
+    for comment_div in cssselect.CSSSelector('div.comments')(tree)[:-1]:
+      if comment_div.xpath('script'):
+        # It's an ad :(
+        continue
+      # Fixup anchors.
+      for anchor in comment_div.xpath('.//a'):
+        #print etree.tostring(anchor)
+        if 'href' in anchor.attrib:
+          anchor.attrib['href'] = urlparse.urljoin(
+            base_url, anchor.get('href'))
+        if 'target' in anchor.attrib:
+          del anchor.attrib['target']
+      timestamp_span = cssselect.CSSSelector('span.smallcopy')(comment_div)[-1]
+      timestamp_str = COMMENT_TIMESTAMP_RE.match(
+        timestamp_span.text_content()).group(1)
+      logger.info('%s', timestamp_str)
+      comment_time = datetime.datetime.strptime(
+        timestamp_str, '%I:%M %p  on %B %d')
+      comment_time = comment_time.replace(year=post_time.year)
+      logger.info('%s', comment_time)
+      comments.append(data.Comment(
+        html=etree.tostring(comment_div, encoding=unicode),
+        posted_time=comment_time))
+    logger.info('Found %s comments at %s', len(comments), base_url)
+    self.post = data.Post(
+      url=base_url,
+      title=post_title,
+      posted_time=post_time,
+      num_comments=len(comments),
+      comments=comments)
 
 
 class MetafilterIndexPageParser(object):
