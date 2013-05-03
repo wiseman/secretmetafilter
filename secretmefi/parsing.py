@@ -66,7 +66,6 @@ class MetafilterPostPageParser(object):
         continue
       # Fixup anchors.
       for anchor in comment_div.xpath('.//a'):
-        #print etree.tostring(anchor)
         if 'href' in anchor.attrib:
           anchor.attrib['href'] = urlparse.urljoin(
             base_url, anchor.get('href'))
@@ -75,11 +74,9 @@ class MetafilterPostPageParser(object):
       timestamp_span = cssselect.CSSSelector('span.smallcopy')(comment_div)[-1]
       timestamp_str = COMMENT_TIMESTAMP_RE.match(
         timestamp_span.text_content()).group(1)
-      logger.info('%s', timestamp_str)
       comment_time = datetime.datetime.strptime(
         timestamp_str, '%I:%M %p  on %B %d')
       comment_time = comment_time.replace(year=post_time.year)
-      logger.info('%s', comment_time)
       comments.append(data.Comment(
         html=etree.tostring(comment_div, encoding=unicode),
         posted_time=comment_time))
