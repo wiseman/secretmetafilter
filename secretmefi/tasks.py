@@ -107,6 +107,7 @@ def post_age(post, now):
 class IndexPageScraperWorker(webapp2.RequestHandler):
   def post(self):
     page_num = int(self.request.get('page_num'))
+    num_pages_scraped = int(self.request.get('num_pages_scraped', 0)) + 1
     logger.info('Scraping index page %s', page_num)
     posts = scrape_index_page(page_num)
     # FOR DEBUGGING
@@ -149,6 +150,7 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
           else:
             logger.info("Queueing %s because we haven't scraped it before.",
             url)
+          num_pages_scraped += 1
           taskqueue.add(
             url='/task/PostPageScraperWorker',
             params={'url': url})
@@ -161,8 +163,12 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
       logger.info('Queueing next index page (%s)', next_page_num)
       taskqueue.add(
         url='/task/IndexPageScraperWorker',
-        params={'page_num': next_page_num})
+        params={
+          'page_num': next_page_num,
+          'num_pages_scraped': num_pages_scraped
+        })
     else:
+      logger.info('Total number of pages scraped: %s', num_pages_scraped)
       taskqueue.add(url='/task/HtmlGeneratorWorker')
 
 

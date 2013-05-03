@@ -1,4 +1,4 @@
 cron:
 - description: Refresh posts
   url: /admin
-  schedule: every 6 hours
+  schedule: every 2 hours
