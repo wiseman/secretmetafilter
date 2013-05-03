@@ -52,7 +52,7 @@
         <div class="copy">
           <p>
             Secret Metafilter scrapes the past month's worth of posts
-            on metafilter.com every 6 hours.
+            on metafilter.com every two hours.
           </p>
 
           <p>
@@ -65,11 +65,12 @@
           <p>
             The scraper tries hard not to scrape a page unless it has
             to by scraping post metadata from index pages and then
-            deciding if it needs to scrape the post page itself.
-            During the day, while Metafilter is active, the scraper
-            will typically scrape about 40 pages every six hours.
-            When Metafilter is less active, fewer pages will need to
-            be scraped.
+            deciding if it needs to scrape each post page to get new
+            comments.  During the day, while Metafilter is active, the
+            scraper will typically scrape about 25 pages every two
+            hours (an average of one page every five minutes).  When
+            Metafilter is less active, fewer pages will need to be
+            scraped.
           </p>
         </div>
 
@@ -93,7 +94,8 @@
       </div>
 
       <div class="announcement">
-        <a href="https://developers.google.com/appengine/"><img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif" alt="Powered by Google App Engine" /></a>
+        <a href="https://developers.google.com/appengine/"><img src="https://developers.google.com/appengine/images/appengine-noborder-120x30.gif"
+        alt="Powered by Google App Engine" /></a>
       </div>
 
       <script type="text/javascript">
