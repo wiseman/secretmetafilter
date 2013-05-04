@@ -15,6 +15,7 @@ skip_files:
 - ^(.*/)?.*/RCS/.*
 - ^(.*/)?\..*
 - env
+- closure-library
 
 builtins:
 - remote_api: on
