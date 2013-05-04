@@ -1,10 +1,8 @@
 body {
-    background-color:#006699;
     font-family: Verdana, sans-serif;
     font-size: 10pt;
     font-weight: normal;
     margin: 20px;
-    color: #fff;
 }
 h1 {
     font-family: Georgia,"Times New Roman",serif!important;
@@ -19,11 +17,9 @@ h2 {
     font-family: Arial,sans-serif!important;
     font-size: 14pt;
     font-weight: normal;
-    color: #ffc;
     margin: 10px 0 10px 0;
 }
 h2 a {
-    color: #ddd!important;
     font-weight: normal;
 }
 p {
@@ -115,18 +111,11 @@ input.text {
     padding-bottom: 2px;
 }
 .smallcopy {
-    color: #ccc;
     font-size: 10pt;
 }
 a {
     font-weight: bold;
     text-decoration: none;
-}
-a:visited {
-    color: #cc9;
-}
-a:link {
-    color: #cc0;
 }
 .about {
     float: right;

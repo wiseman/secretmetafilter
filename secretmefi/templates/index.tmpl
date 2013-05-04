@@ -6,14 +6,26 @@
     <title>Secret Metafilter</title>
     <link rel="stylesheet" type="text/css" href="/static/reset.css">
     <link rel="stylesheet" type="text/css" href="/static/site.css">
+    <link rel="stylesheet" type="text/css" href="/static/white.css"
+          id="white-css" disabled="true">
+    <link rel="stylesheet" type="text/css" href="/static/blue.css"
+          id="blue-css">
+    <script type="text/javascript" src="static/app.min.js"></script>
   </head>
 
   <body id="container">
     <div class="about">
-      <a href="/static/about.html">About</a>
+      <a href="/static/about.html">About</a><br/>
     </div>
 
-    <h1>Secret Metafilter</span></h1>
+    <h1>Secret Metafilter</h1>
+
+    <div class="about">
+      <select id="color" name="Color">
+        <option value="blue">Blue</option>
+        <option value="white">White</option>
+      </select>
+    </div>
 
     <p>
       Secret Metafilter highlights discussions that are still active
@@ -37,6 +49,11 @@
       {% endfor %}
       </div>
     {% endfor %}
+
+      <script type="text/javascript">
+        var app = new SecretMefi.App();
+        app.start();
+      </script>
 
     <script type="text/javascript">
 

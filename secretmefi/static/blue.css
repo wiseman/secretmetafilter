@@ -1,0 +1,19 @@
+body {
+    background-color:#006699;
+    color: #fff;
+}
+h2 {
+    color: #ffc;
+}
+h2 a {
+    color: #ddd!important;
+}
+.smallcopy {
+    color: #ccc;
+}
+a:visited {
+    color: #cc9;
+}
+a:link {
+    color: #cc0;
+}
