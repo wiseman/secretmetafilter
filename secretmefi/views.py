@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os.path
 
@@ -6,11 +5,10 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import db
 import jinja2
 import pretty_timedelta
-
 import webapp2
 
-from secretmefi import data
 from secretmefi import tasks
+
 
 logger = logging.getLogger(__name__)
 
