@@ -3,7 +3,7 @@ import json
 import logging
 
 from google.appengine.ext import db
-import webapp2
+
 
 logger = logging.getLogger(__name__)
 
