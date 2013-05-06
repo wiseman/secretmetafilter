@@ -10,24 +10,29 @@ goog.require('goog.dom');
  * @constructor
  */
 SecretMefi.App = function() {
+  this.colorPref = "blue";
 };
 
 /**
- * Initializes and starts the app.
+ * Loads CSS according to the user's preference as stored in a cookie.
  */
-SecretMefi.App.prototype.start = function() {
-  var colorElement = document.getElementById("color");
-  colorElement.addEventListener(
+SecretMefi.App.prototype.setColorFromCookie = function() {
+  this.colorPref = goog.net.cookies.get("color", this.colorPref);
+  if (this.colorPref) {
+    this.setColor(this.colorPref);
+  }
+};
+
+
+SecretMefi.App.prototype.addColorEventHandler = function(element) {
+  if (this.colorPref) {
+    element.value = this.colorPref;
+  }
+  element.addEventListener(
     "change",
     goog.bind(this.colorChanged_, this),
     false);
-
-  var colorPref = goog.net.cookies.get("color", "blue");
-  if (colorPref) {
-    this.setColor(colorPref);
-    colorElement.value = colorPref;
-  }
-};
+}
 
 
 /**
@@ -69,5 +74,7 @@ SecretMefi.App.prototype.colorChanged_ = function(e) {
 
 // Ensures the symbol will be visible after compiler renaming.
 goog.exportSymbol("SecretMefi.App", SecretMefi.App);
-goog.exportSymbol("SecretMefi.App.prototype.start",
-                  SecretMefi.App.prototype.start);
+goog.exportSymbol("SecretMefi.App.prototype.setColorFromCookie",
+                  SecretMefi.App.prototype.setColorFromCookie)
+goog.exportSymbol("SecretMefi.App.prototype.addColorEventHandler",
+                  SecretMefi.App.prototype.addColorEventHandler);

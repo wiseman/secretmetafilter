@@ -7,6 +7,10 @@
     <link rel="stylesheet" type="text/css" href="/static/reset.css">
     <link rel="stylesheet" type="text/css" href="/static/site.css">
     <script type="text/javascript" src="static/app.min.js"></script>
+    <script type="text/javascript">
+      var app = new SecretMefi.App();
+      app.setColorFromCookie();
+    </script>
 
   </head>
 
@@ -18,13 +22,13 @@
     <h1>Secret Metafilter</h1>
 
     <div class="about">
-      <select id="color" name="Color">
+      <select id="colormenu" name="Color">
         <option value="blue">Blue</option>
         <option value="white">White</option>
       </select>
       <script type="text/javascript">
-        var app = new SecretMefi.App();
-        app.start();
+        console.log(app);
+        app.addColorEventHandler(document.getElementById("colormenu"));
       </script>
     </div>
 
