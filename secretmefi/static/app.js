@@ -3,6 +3,7 @@ goog.provide('SecretMefi.App');
 goog.require('goog.net.cookies');
 goog.require('goog.dom');
 
+
 /**
  * SecretMefi App object.
  *
@@ -10,7 +11,6 @@ goog.require('goog.dom');
  */
 SecretMefi.App = function() {
 };
-
 
 /**
  * Initializes and starts the app.
@@ -29,6 +29,13 @@ SecretMefi.App.prototype.start = function() {
   }
 };
 
+
+/**
+ * Loads CSS for a color (blue or white).
+ *
+ * @param {string} color The desired color.
+ * @private
+ */
 SecretMefi.App.prototype.setColor = function(color) {
   var cssUrl = null;
   if (color === "white") {
@@ -37,7 +44,6 @@ SecretMefi.App.prototype.setColor = function(color) {
     cssUrl = "/static/blue.css";
   }
   var dh = new goog.dom.DomHelper();
-  window.console.log(dh);
   dh.getElementsByTagNameAndClass("head")[0].appendChild(
     goog.dom.createDom(
       "link",
@@ -48,12 +54,17 @@ SecretMefi.App.prototype.setColor = function(color) {
       }));
 };
 
+
+/**
+ * Event handler for sticky color dropdown menu.
+ *
+ * @param {Object} e The event.
+ */
 SecretMefi.App.prototype.colorChanged_ = function(e) {
   var colorPref = e.target["value"];
   this.setColor(colorPref);
   goog.net.cookies.set("color", colorPref);
 }
-
 
 
 // Ensures the symbol will be visible after compiler renaming.
