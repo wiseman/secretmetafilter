@@ -31,16 +31,18 @@
       Secret Metafilter highlights discussions that are still active
       on older Metafilter posts.
     </p>
+
     <hr>
-    <p class="smallcopy">
-      Last updated at {{last_updated_time.strftime('%B %d, %Y %I:%M %p')}}.
-    </p>
+
+    <div class="smallcopy">
+      Last updated {{last_updated_time.strftime('%B %-d, %Y %I:%M %p %Z')}}.
+    </div>
 
     {% for post in posts %}
       <h2><a href="{{post.url}}">{{post.title}}</a></h2>
       <div class="copy">
         <span class="smallcopy">
-          {{post.posted_time.strftime('%B %d, %Y %I:%M %p')}}
+          {{post.posted_time.strftime('%B %-d, %Y %I:%M %p')}}
           ({{post.posted_timedelta|pretty_timedelta}})<br>
           {{post.num_comments}} total comments, last 5 shown below...
         </span>

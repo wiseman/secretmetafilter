@@ -10,6 +10,7 @@ import urllib2
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import db
+from pytz.gae import pytz
 
 import webapp2
 
@@ -87,9 +88,11 @@ class HtmlGeneratorWorker(webapp2.RequestHandler):
     logger.info('Displaying %s posts', len(posts))
     for p in posts:
       p['posted_timedelta'] = p['posted_time'] - now
+    pacific_tz = pytz.timezone('US/Pacific')
+    local_now = now.replace(tzinfo=pytz.utc).astimezone(pacific_tz)
     template = jinja.get_template('index.tmpl')
     template_values = {
-      'last_updated_time': now,
+      'last_updated_time': local_now,
       'posts': posts
     }
     html = template.render(template_values)
