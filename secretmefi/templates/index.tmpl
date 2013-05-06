@@ -6,11 +6,10 @@
     <title>Secret Metafilter</title>
     <link rel="stylesheet" type="text/css" href="/static/reset.css">
     <link rel="stylesheet" type="text/css" href="/static/site.css">
-    <link rel="stylesheet" type="text/css" href="/static/white.css"
-          id="white-css" disabled="true">
     <link rel="stylesheet" type="text/css" href="/static/blue.css"
           id="blue-css">
     <script type="text/javascript" src="static/app.min.js"></script>
+
   </head>
 
   <body id="container">
@@ -25,6 +24,10 @@
         <option value="blue">Blue</option>
         <option value="white">White</option>
       </select>
+      <script type="text/javascript">
+        var app = new SecretMefi.App();
+        app.start();
+      </script>
     </div>
 
     <p>
@@ -55,11 +58,6 @@
       {% endfor %}
       </div>
     {% endfor %}
-
-      <script type="text/javascript">
-        var app = new SecretMefi.App();
-        app.start();
-      </script>
 
     <script type="text/javascript">
 
