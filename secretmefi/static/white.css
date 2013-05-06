@@ -5,6 +5,9 @@ body {
 h2 {
     color: #ffc;
 }
+h2 a {
+    color: #666!important;
+}
 .smallcopy {
     color: #666;
 }
