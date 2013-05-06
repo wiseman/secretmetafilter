@@ -88,7 +88,10 @@ class HtmlGeneratorWorker(webapp2.RequestHandler):
     for p in posts:
       p['posted_timedelta'] = p['posted_time'] - now
     template = jinja.get_template('index.tmpl')
-    template_values = {'posts': posts}
+    template_values = {
+      'last_updated_time': now,
+      'posts': posts
+    }
     html = template.render(template_values)
     html_model = data.HtmlModel(key_name='index.html')
     html_model.html = html
