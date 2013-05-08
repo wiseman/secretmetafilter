@@ -11,5 +11,5 @@ discussions that are still active.
 You can see it running at
 [http://secretmefi.appspot.com/](http://secretmefi.appspot.com/).
 
-![Secret Metafilter screenshot](https://github.com/wiseman/secretmefi/raw/master/secretmefi.png
+![Secret Metafilter screenshot](https://github.com/wiseman/secretmetafilter/raw/master/secretmefi.png
 "Secret Metafilter screenshot")
