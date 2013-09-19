@@ -14,7 +14,13 @@ You can see it running at
 ![Secret Metafilter screenshot](https://github.com/wiseman/secretmetafilter/raw/master/secretmefi.png
 "Secret Metafilter screenshot")
 
-## To run tests
+## To build the javascript
+
+```
+$ make
+```
+
+## To run the tests
 
 ```
 $ virtualenv env
