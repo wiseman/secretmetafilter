@@ -127,3 +127,12 @@ a {
 tt {
     font-size: 12px;
 }
+blockquote {
+    margin-left: 50px;
+    margin-right: 50px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+ul {
+    list-style: disc;
+}
