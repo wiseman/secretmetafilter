@@ -37,16 +37,6 @@ p {
   vertical-align: baseline;
   background: transparent;
 }
-blockquote {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  quotes: none;
-}
 pre,
 a,
 abbr,
@@ -138,18 +128,6 @@ dd {
   vertical-align: baseline;
   background: transparent;
 }
-ol,
-ul {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  background: transparent;
-  list-style: none;
-}
-li,
 fieldset,
 form,
 label,
