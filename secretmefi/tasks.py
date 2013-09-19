@@ -150,7 +150,7 @@ class IndexPageScraperWorker(webapp2.RequestHandler):
               url, index_num_comments, db_num_comments)
           else:
             logger.info("Queueing %s because we haven't scraped it before.",
-            url)
+                        url)
           num_pages_scraped += 1
           taskqueue.add(
             url='/task/PostPageScraperWorker',
