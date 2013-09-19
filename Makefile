@@ -1,4 +1,3 @@
-WEB_DIR = modules/lib/mavelous_web
 JS_SCRIPT_DIR = secretmefi/static
 TOOL_DEPS_ROOT = .tools
 
@@ -16,14 +15,14 @@ JS_FILES = app.js
 
 JS_SRCS = $(addprefix ${JS_SCRIPT_DIR}/,${JS_FILES})
 
-MAVELOUS_TARGETS = ${JS_SCRIPT_DIR}/app.min.js
+JS_TARGETS = ${JS_SCRIPT_DIR}/app.min.js
 
 .PHONY: all build lint lintfix clean build-tool-deps
 
 
 all: build
 
-build: build-tool-deps ${MAVELOUS_TARGETS}
+build: build-tool-deps ${JS_TARGETS}
 
 deps: ${JS_SCRIPT_DIR}/mavelous-deps.js
 
@@ -35,7 +34,7 @@ lintfix:
 	fixjsstyle --strict ${JS_SRCS}
 
 clean:
-	-rm ${MAVELOUS_TARGETS}
+	-rm ${JS_TARGETS}
 
 
 build-tool-deps: ${CLOSURE_COMPILER} ${CLOSURE_BUILDER}
@@ -63,14 +62,6 @@ ${JS_SCRIPT_DIR}/mavelous-deps.js: ${JS_SRCS}
 	 --exclude=${JS_SCRIPT_DIR}/mavelous.min.js \
 	 --output_mode=deps \
 	| sort > $@
-
-
-${WEB_DIR}/index.html: ${WEB_DIR}/index.tmpl
-	python jinja_static.py ${WEB_DIR}/index.tmpl --output_file=${WEB_DIR}/index.html
-
-${WEB_DIR}/index_compiled.html: ${WEB_DIR}/index.tmpl
-	python jinja_static.py ${WEB_DIR}/index.tmpl -D compiled --output_file=${WEB_DIR}/index_compiled.html
-
 
 
 ${CLOSURE_COMPILER}:
