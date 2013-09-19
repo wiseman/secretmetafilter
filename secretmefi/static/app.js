@@ -32,7 +32,7 @@ SecretMefi.App.prototype.addColorEventHandler = function(element) {
     "change",
     goog.bind(this.colorChanged_, this),
     false);
-}
+};
 
 
 /**
@@ -69,12 +69,12 @@ SecretMefi.App.prototype.colorChanged_ = function(e) {
   var colorPref = e.target["value"];
   this.setColor(colorPref);
   goog.net.cookies.set("color", colorPref);
-}
+};
 
 
 // Ensures the symbol will be visible after compiler renaming.
 goog.exportSymbol("SecretMefi.App", SecretMefi.App);
 goog.exportSymbol("SecretMefi.App.prototype.setColorFromCookie",
-                  SecretMefi.App.prototype.setColorFromCookie)
+                  SecretMefi.App.prototype.setColorFromCookie);
 goog.exportSymbol("SecretMefi.App.prototype.addColorEventHandler",
                   SecretMefi.App.prototype.addColorEventHandler);
