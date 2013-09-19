@@ -25,7 +25,7 @@ class Error(Exception):
 def stringify_children(node):
   parts = ([node.text] +
            list(itertools.chain(
-             *([c.text, etree.tostring(c, encoding=unicode), c.tail]
+             *([c.text, etree.tostring(c, encoding=unicode, method='html'), c.tail]
                for c in node.getchildren()))) +
            [node.tail])
   # filter removes possible Nones in texts and tails
@@ -78,7 +78,7 @@ class MetafilterPostPageParser(object):
         timestamp_str, '%I:%M %p  on %B %d')
       comment_time = comment_time.replace(year=post_time.year)
       comments.append(data.Comment(
-        html=etree.tostring(comment_div, encoding=unicode),
+        html=etree.tostring(comment_div, encoding=unicode, method='html'),
         posted_time=comment_time))
     logger.info('Found %s comments at %s', len(comments), base_url)
     self.post = data.Post(
