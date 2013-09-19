@@ -13,3 +13,12 @@ You can see it running at
 
 ![Secret Metafilter screenshot](https://github.com/wiseman/secretmetafilter/raw/master/secretmefi.png
 "Secret Metafilter screenshot")
+
+## To run tests
+
+```
+$ virtualenv env
+$ env/bin/pip install NoseGAE argparse distribute lxml nose wsgiref
+$ env/bin/python env/bin/nosetests --with-gae --gae-lib-root=/usr/local/google_appengine --without-sandbox
+```
+
